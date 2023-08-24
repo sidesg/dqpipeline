@@ -1,15 +1,16 @@
 from ckanapi import RemoteCKAN
 import json
+import os
 
 def get_package(id, connexion: RemoteCKAN) -> dict:
-    test = connexion.call_action("package_show", {"id": id})
+    package = connexion.call_action("package_show", {"id": id})
     
-    return test
+    return package
 
 def get_resource(id, connexion: RemoteCKAN) -> dict:
-    test = connexion.call_action("resource_show", {"id": id})
+    resource = connexion.call_action("resource_show", {"id": id})
     
-    return test
+    return resource
 
 class CKANGeneral():
     def __init__(self, data: dict = dict()) -> None:
@@ -50,8 +51,14 @@ class CKANPackage(CKANGeneral):
 
 class CKANResource(CKANGeneral):
     def update_file(self, path: str, conn: RemoteCKAN):
+        file_size = int(round(os.stat(path).st_size / (1024 * 1024), 0))
+        
         conn.call_action(
             "resource_patch",
-            {"id": self.id},
+            {
+                "id": self.id,
+                "taille_entier": file_size
+            },
             files={"upload": open(path, "rb")}
-            )
+        )
+        

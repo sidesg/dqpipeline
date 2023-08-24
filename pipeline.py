@@ -1,7 +1,9 @@
+#TODO: Add logging, more flexible fields for resource update
+
 from ckanapi import RemoteCKAN
 import yaml
 import lib as lb
-from lib import CKANPackage, CKANResource
+from lib import CKANResource
 
 def main():
     keypath = ".creds/apikey.txt"
@@ -16,9 +18,10 @@ def main():
     for ress_id, path in updates.items():
         with RemoteCKAN('https://www.donneesquebec.ca', 
                         user_agent=ua, apikey=apikey) as conn:
-            test = CKANResource(lb.get_resource(ress_id, conn))
-            test.update_file("data/" + path, conn)
+            resource = CKANResource(lb.get_resource(ress_id, conn))
+            resource.update_file("data/" + path, conn)
 
 
 if __name__ == "__main__":
     main()
+    
