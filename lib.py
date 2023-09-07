@@ -2,16 +2,6 @@ from ckanapi import RemoteCKAN
 import json
 import os
 
-def get_package(id, connexion: RemoteCKAN) -> dict:
-    package = connexion.call_action("package_show", {"id": id})
-    
-    return package
-
-def get_resource(id, connexion: RemoteCKAN) -> dict:
-    resource = connexion.call_action("resource_show", {"id": id})
-    
-    return resource
-
 class CKANGeneral():
     def __init__(self, data: dict = dict()) -> None:
         self.data: dict = data
@@ -35,19 +25,24 @@ class CKANPackage(CKANGeneral):
         )
 
     def new_resource(self, path: str, conn: RemoteCKAN):
+        file_size = int(round(os.stat(path).st_size / (1024 * 1024), 0))
         conn.call_action("resource_create",
             {
                 "package_id": self.id,
                 "name": "Ressource test",
                 "url": "test",
                 "description": "test",
-                "taille_entier": 1,
+                "taille_entier": file_size,
                 "resource_type": "donnees",
                 "relidi_condon_valinc": "oui",
                 "format": "JSON"
-                },
+            },
             files={"upload": open(path, "rb")}
         )
+    
+    @classmethod
+    def from_id(cls, id: str, conn: RemoteCKAN):
+        return cls(conn.call_action("package_show", {"id": id}))
 
 class CKANResource(CKANGeneral):
     def update_file(self, path: str, conn: RemoteCKAN):
@@ -61,4 +56,7 @@ class CKANResource(CKANGeneral):
             },
             files={"upload": open(path, "rb")}
         )
-        
+
+    @classmethod
+    def from_id(cls, id: str, conn: RemoteCKAN):
+        return cls(conn.call_action("resource_show", {"id": id}))
