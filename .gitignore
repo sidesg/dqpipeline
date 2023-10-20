@@ -1,4 +1,5 @@
 .creds
+*.log
 data
 updates.yml
 __pycache__
